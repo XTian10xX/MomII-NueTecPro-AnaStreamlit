@@ -76,12 +76,15 @@ df_filtrado = df_filtrado[
 ]
 
 # Aplicar filtros al DataFrame original
+# Aplicar todos los filtros al DataFrame
 df_filtrado = df[
     (df["ESTADO_NOTICIA"].isin(estado_seleccionado)) &
     (df["ETAPA"].isin(etapa_seleccionada)) &
     (df["DELITO"].isin(delito_seleccionado)) &
     (df["CONDENA"].isin(condena_seleccionada)) &
-    (df["MUNICIPIO"].isin(municipio_seleccionado))
+    (df["MUNICIPIO"].isin(municipio_seleccionado)) &
+    (df["TOTAL_PROCESOS"] >= rango_procesos[0]) &
+    (df["TOTAL_PROCESOS"] <= rango_procesos[1])
 ]
 
 st.subheader("📊 Procesos por Estado y Condena")
@@ -156,6 +159,27 @@ fig_pie_etapa = px.pie(
     title="Distribución de Procesos por Etapa Judicial",
     hole=0.3  # Si quieres un gráfico tipo 'donut'
 )
+
+st.subheader("📈 Delitos según Total de Procesos")
+
+# Crear una nueva gráfica que refleje el filtro de procesos
+# Agrupar por DELITO y sumar TOTAL_PROCESOS
+delitos_procesos = df_filtrado.groupby("DELITO")["TOTAL_PROCESOS"].sum().reset_index()
+delitos_procesos = delitos_procesos.sort_values("TOTAL_PROCESOS", ascending=False).head(10)  # Top 10 delitos
+
+# Crear gráfico
+fig_delitos = px.bar(
+    delitos_procesos,
+    x="DELITO",
+    y="TOTAL_PROCESOS",
+    title="Top 10 Delitos por Cantidad de Procesos (Filtrados)",
+    labels={"DELITO": "Delito", "TOTAL_PROCESOS": "Cantidad de Procesos"},
+    color="TOTAL_PROCESOS",
+    color_continuous_scale="Reds"
+)
+
+# Mostrar gráfico
+st.plotly_chart(fig_delitos, use_container_width=True)
 
 st.plotly_chart(fig_pie_etapa)
 
