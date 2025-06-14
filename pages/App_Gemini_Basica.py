@@ -75,7 +75,7 @@ st.title("🧠 Tu Asistente con Gemini")
 st.markdown("Puedes escribir cualquier cosa: preguntas generales, pedir consejos o que te organice tu semana.")
 
 # Modo de asistencia
-modo = st.selectbox("Selecciona el modo de asistencia:", ["Chat General", "Organizar mi semana"])
+modo = st.selectbox("Selecciona el modo de asistencia:", ["Chat General", "Plan de Estudio"])
 entrada = st.text_area("💭 Escribe tu mensaje o actividades:", height=200)
 generar = st.button("Generar Respuesta")
 
@@ -86,13 +86,16 @@ def generar_chat(prompt):
     return respuesta.text
 
 # Función para generar agenda semanal
-def generar_agenda(actividades):
+def generar_plan(actividades):
     prompt = (
-        f"Tengo estas actividades, compromisos o ideas para esta semana: {actividades}\n\n"
-        "Quiero que me organices una agenda semanal de lunes a domingo, con horarios aproximados para cada actividad, incluyendo descansos, tiempos de comida y sugerencias de horarios realistas.\n"
-        "Si no hay mucha información, deduce lo que haría una persona común con tiempo libre y agrega sugerencias como ejercicio, descanso, ocio o aprendizaje.\n"
-        "El resultado debe estar bien estructurado y legible, tipo:\n"
-        "Lunes:\n- 9:00am: Revisar correos\n- 10:00am: Estudiar inglés\n...\n"
+        f"""
+        Genera un texto explicativo y práctico dirigido a estudiantes de todas las edades que han tenido dificultades y han reprobado algunas asignaturas con notas inferiores a 3.0. 
+        El texto debe describir cómo la entidad educativa puede diseñar un plan de estudios efectivo para que estos estudiantes puedan recuperar sus materias y mejorar sus calificaciones a través de {actividades}. 
+        Explica de manera clara y sencilla los pasos que se deben seguir, las estrategias de estudio recomendadas, y cómo organizar el tiempo para lograr el éxito académico. 
+        Usa un lenguaje accesible para que cualquier estudiante pueda entenderlo.
+
+        Además, incluye una tabla que detalle el contenido del plan de estudio, organizada por asignaturas, actividades específicas para recuperar la materia, y el tiempo recomendado para cada actividad.
+        """
     )
     respuesta = generar_chat(prompt)
     return respuesta
@@ -119,15 +122,9 @@ if generar and entrada.strip():
             respuesta = generar_chat(entrada)
             st.subheader("🔊 Respuesta:")
             st.markdown(respuesta)
-        elif modo == "Organizar mi semana":
-            respuesta = generar_agenda(entrada)
-            st.subheader("🗓️ Agenda Generada:")
+        elif modo == "Plan de Estudio":
+            respuesta = generar_plan(entrada)
+            st.subheader("🗓️ Plan de Estudio generado:")
             st.markdown(respuesta)
-            st.subheader("📋 Calendario Interactivo:")
-            df_eventos = extraer_eventos_a_dataframe(respuesta)
-            if not df_eventos.empty:
-                st.dataframe(df_eventos, use_container_width=True)
-            else:
-                st.warning("No se pudieron extraer eventos estructurados. Intenta ingresar más detalles.")
 else:
     st.info("✍️ Escribe lo que necesites y elige el modo de asistencia.")
